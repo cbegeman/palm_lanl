@@ -1,0 +1,31 @@
+#!/bin/bash
+
+repo_path=$PWD
+#build_path="/path/to/build/directory/"
+build_path="/lustre/scratch5/cbegeman/palm/jobs/test-chicoma-build/"
+compile_debug="False"
+build_flags=""
+
+if [[ ! -d $build_path ]]; then
+   mkdir -p $build_path
+fi
+# Save git commit hash to make directory
+git rev-parse HEAD > $build_path"build_commit.txt"
+
+if [[ $compile_debug == "True" ]]; then
+    build_flags="-D"
+fi
+
+export PATH="$repo_path/trunk/SCRIPTS:$PATH"
+module purge
+module load intel/2021.4.0
+module load cray-mpich/8.1.12
+module load PrgEnv-intel/8.3.0
+module load cmake/3.20.3
+module load cray-python/3.9.4.2
+module load cray-fftw/3.3.8.12
+module load cray-hdf5/1.12.0.7
+module load cray-netcdf/4.7.4.7
+export PATH=/lustre/scratch5/.mdt0/cbegeman/palm/bin:${PATH}
+#module use -a /usr/projects/climate/SHARED_CLIMATE/modulefiles/all
+palm_simple_build -b ifort.grizzly_hdf5 -w $build_path $build_flags
